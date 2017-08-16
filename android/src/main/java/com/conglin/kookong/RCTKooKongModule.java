@@ -1,49 +1,46 @@
 
 package com.conglin.kookong.RCTKooKong;
 
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Base64;
+
 import android.util.Log;
 import android.widget.Toast;
 import android.os.AsyncTask;
-import android.os.Bundle;
 
 import com.facebook.react.bridge.*;
 
-import javax.annotation.Nullable;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 
-import com.espressif.iot.esptouch.EsptouchTask;
-import com.espressif.iot.esptouch.IEsptouchListener;
-import com.espressif.iot.esptouch.IEsptouchResult;
-import com.espressif.iot.esptouch.IEsptouchTask;
-import com.espressif.iot.esptouch.task.__IEsptouchTask;
-import com.integrity_project.smartconfiglib.SmartConfig;
-import com.integrity_project.smartconfiglib.SmartConfigListener;
-import com.conglin.kookong.RCTKooKong.utils.MDnsCallbackInterface;
-import com.conglin.kookong.RCTKooKong.utils.MDnsHelper;
-import com.conglin.kookong.RCTKooKong.utils.NetworkUtil;
-import com.conglin.kookong.RCTKooKong.utils.SmartConfigConstants;
+import com.conglin.kookong.util.Logger;
+import com.conglin.kookong.util.TipsUtil;
+import com.hzy.tvmao.KookongSDK;
+import com.hzy.tvmao.interf.IRequestResult;
+import com.hzy.tvmao.ir.Device;
+import com.hzy.tvmao.utils.LogUtil;
+import com.kookong.app.data.AppConst;
+import com.kookong.app.data.BrandList;
+import com.kookong.app.data.BrandList.Brand;
+import com.kookong.app.data.IrData;
+import com.kookong.app.data.IrDataList;
+import com.kookong.app.data.RemoteList;
+import com.kookong.app.data.SpList;
+import com.kookong.app.data.SpList.Sp;
+import com.kookong.app.data.StbList;
+import com.kookong.app.data.StbList.Stb;
+
 
 public class RCTKooKongModule extends ReactContextBaseJavaModule {
-    private SmartConfig smartConfig;
-	private SmartConfigListener smartConfigListener;
-    private byte[] freeData;
-	private MDnsHelper mDnsHelper;
-	private MDnsCallbackInterface mDnsCallback;
-    private static final String TAG = "RCTKooKongModule";
-
-    private final ReactApplicationContext _reactContext;
-
-    private IEsptouchTask mEsptouchTask;
+    //    public static final String APP_KEY = "4E70159C5A3533C842ECFEED65333DB9";//7252EB5D43374424D19037432D411960
+    public static final String APP_KEY = "7252EB5D43374424D19037432D411960";
+    public static final String irDeviceId = "1";//如果是按红外设备授权收费则填上设备的id，否则使用KookongSDK.init(this,APP_KEY);
+    private static ReactApplicationContext _reactContext;
 
     public RCTKooKongModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -52,189 +49,75 @@ public class RCTKooKongModule extends ReactContextBaseJavaModule {
     }
 
     @Override
+    public Map<String, Object> getConstants() {
+        final Map<String, Object> constants = new HashMap<>();
+        // constants.put(DURATION_SHORT_KEY, Toast.LENGTH_SHORT);
+        // constants.put(DURATION_LONG_KEY, Toast.LENGTH_LONG);
+        return constants;
+    }
+
+    @Override
     public String getName() {
-        return "Smartconfig";
+        return "KooKong";
+    }
+
+    /*
+     * 服务器返回错误代码含义
+     * 代码     	意义
+     * code 1	secret 错误
+     * code 2	secret 不存在
+     * code 3	客户已被禁用
+     * code 4	客户已超期
+     * code 6	选择运营商超出数量限制
+     * code 7	无访问权限
+     * code 8	试用数超出限制
+     * code 9	设备数超出限制
+     * code 10	单台设备下载红外超出限制
+    */
+    @ReactMethod
+    protected void initKooKongSDK(String key, String irDeviceId) {
+        //1.在App的入口进行初始化, 在Application中初始化也可以
+        //按红外设备授权收费的客户，需要传递自己设备唯一的标识，使用KookongSDK.init(Context context, String key, String irDeviceId);
+        //其他客户使用KookongSDK.init(Context context, String key);
+        boolean result = KookongSDK.init(_reactContext, key, irDeviceId);
+        LogUtil.d("Verify result is " + result);
+        KookongSDK.setDebugMode(true);
     }
 
     @ReactMethod
-    public void stop(final ReadableMap options) {
-        String type = options.getString("type");
-        if (type == "cc3000"){
-            this.stopCC3000();
-        }else{
-            if (mEsptouchTask != null) {
-                Log.d(TAG, "cancel task");
-                mEsptouchTask.interrupt();
-            }
-        }
+    public void getBrandListFromNet(final int deviceType, final Promise promise) {
+        // 获取电视机, 空调等, (除STB以外) 的设备品牌列表
+                /*
+                 * public int STB = 1; //机顶盒
+                 * public int TV  = 2; //电视
+                 * public int BOX = 3; //网络盒子
+                 * public int DVD = 4; //DVD
+                 * public int AC  = 5; //空调
+                 * public int PRO = 6; //投影仪
+                 * public int PA  = 7; //功放
+                 * public int FAN = 8; //风扇
+                 * public int SLR = 9; //单反相机
+                 * public int Light = 10; //开关灯泡
+                 */
+        KookongSDK.getBrandListFromNet(deviceType, new IRequestResult<BrandList>()
+        {
 
-    }
-
-    @ReactMethod
-    public void start(final ReadableMap options, final Promise promise) {
-        String type = options.getString("type");
-        String pass = options.getString("password");
-        if (type == "cc3000"){
-            this.startCC3000(options, promise);
-        }else{
-            this.startEsptouch(options, promise);
-        }
-
-    }
-    private void startCC3000(final ReadableMap options, final Promise promise) {
-        this.startCC3000SmartConfig(options);
-    }
-    private void stopCC3000() {
-        new Thread() {
-            public void run() {
-                try {
-                    smartConfig.stopTransmitting();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-    }
-    private void startCC3000SmartConfig(final ReadableMap options) {
-        String passwordKey = options.getString("password").trim();
-        byte[] paddedEncryptionKey;
-        String SSID = options.getString("ssid").trim();
-        String gateway = NetworkUtil.getGateway(this._reactContext);
-        paddedEncryptionKey = null;
-
-        freeData = new byte[1];
-        freeData[0] = 0x03;
-        smartConfig = null;
-        smartConfigListener = new SmartConfigListener() {
             @Override
-            public void onSmartConfigEvent(SmtCfgEvent event, Exception e) {
-               System.out.println("onSmartConfigEvent----------->"+event.name()+" toString:"+event.toString());
+            public void onSuccess(String msg, BrandList result) {
+                List<Brand> stbs = result.brandList;
+                for (int i = 0; i < stbs.size(); i++) {
+                    Logger.d("The Brand is " + stbs.get(i).cname + ":" + stbs.get(i).brandId);
+                }
             }
-        };
-        try {
-            smartConfig = new SmartConfig(smartConfigListener, freeData,
-                    passwordKey, paddedEncryptionKey, gateway, SSID, (byte) 0,
-                    "");
-            smartConfig.transmitSettings();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void startEsptouch(final ReadableMap options, final Promise promise) {
-        String ssid = options.getString("ssid");
-        String pass = options.getString("password");
-        Boolean hidden = false;
-        //Int taskResultCountStr = 1;
-        Log.d(TAG, "ssid " + ssid + ":pass " + pass);
-        this.stop(options);
-        new EsptouchAsyncTask(new TaskListener() {
             @Override
-            public void onFinished(List<IEsptouchResult> result) {
-                // Do Something after the task has finished
-
-                WritableArray ret = Arguments.createArray();
-
-                Boolean resolved = false;
-                for (IEsptouchResult resultInList : result) {
-                    if(!resultInList.isCancelled() &&resultInList.getBssid() != null) {
-                        WritableMap map = Arguments.createMap();
-                        map.putString("bssid", resultInList.getBssid());
-                        map.putString("ipv4", resultInList.getInetAddress().getHostAddress());
-                        ret.pushMap(map);
-                        resolved = true;
-                        if (!resultInList.isSuc())
-                            break;
-
-                    }
-                }
-
-                if(resolved) {
-                    Log.d(TAG, "Success run smartconfig");
-                    promise.resolve(ret);
-                } else {
-                    Log.d(TAG, "Error run smartconfig");
-                    promise.reject("new IllegalViewOperationException()");
-                }
+            public void onFail(Integer errorCode, String msg) {
+//                TipsUtil.toast(MainActivity.this, msg);
+                Logger.d(msg);
 
             }
-        }).execute(ssid, new String(""), pass, "YES", "1");
-        //promise.resolve(encoded);
-        //promise.reject("Error creating media file.");
-        //
-        //Toast.makeText(getReactApplicationContext(), ssid + ":" + pass, 10).show();
+        });
+
     }
 
-    public interface TaskListener {
-        public void onFinished(List<IEsptouchResult> result);
-    }
-
-    private class EsptouchAsyncTask extends AsyncTask<String, Void, List<IEsptouchResult>> {
-
-      //
-      // public interface TaskListener {
-      //     public void onFinished(List<IEsptouchResult> result);
-      // }
-      private final TaskListener taskListener;
-
-      public EsptouchAsyncTask(TaskListener listener) {
-        // The listener reference is passed in through the constructor
-        this.taskListener = listener;
-      }
-
-
-      // without the lock, if the user tap confirm and cancel quickly enough,
-      // the bug will arise. the reason is follows:
-      // 0. task is starting created, but not finished
-      // 1. the task is cancel for the task hasn't been created, it do nothing
-      // 2. task is created
-      // 3. Oops, the task should be cancelled, but it is running
-      private final Object mLock = new Object();
-
-      @Override
-      protected void onPreExecute() {
-        Log.d(TAG, "Begin task");
-      }
-      @Override
-      protected List<IEsptouchResult> doInBackground(String... params) {
-        Log.d(TAG, "doing task");
-        int taskResultCount = -1;
-        synchronized (mLock) {
-          String apSsid = params[0];
-          String apBssid =  params[1];
-          String apPassword = params[2];
-          String isSsidHiddenStr = params[3];
-          String taskResultCountStr = params[4];
-          boolean isSsidHidden = false;
-          if (isSsidHiddenStr.equals("YES")) {
-            isSsidHidden = true;
-          }
-          taskResultCount = Integer.parseInt(taskResultCountStr);
-          mEsptouchTask = new EsptouchTask(apSsid, apBssid, apPassword,
-              isSsidHidden, getCurrentActivity());
-
-          //mEsptouchTask.setEsptouchListener(myListener);
-        }
-        List<IEsptouchResult> resultList = mEsptouchTask.executeForResults(taskResultCount);
-        return resultList;
-      }
-
-      @Override
-      protected void onPostExecute(List<IEsptouchResult> result) {
-
-        IEsptouchResult firstResult = result.get(0);
-        // check whether the task is cancelled and no results received
-        if (!firstResult.isCancelled()) {
-          if(this.taskListener != null) {
-
-           // And if it is we call the callback function on it.
-           this.taskListener.onFinished(result);
-         }
-        }
-      }
-    }
 }

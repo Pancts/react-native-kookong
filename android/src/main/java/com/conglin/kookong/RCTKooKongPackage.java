@@ -11,6 +11,8 @@ import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.react.bridge.JavaScriptModule;
+import com.conglin.kookong.util.Logger;
+import com.conglin.kookong.util.TipsUtil;
 public class RCTKooKongPackage implements ReactPackage {
 
 
