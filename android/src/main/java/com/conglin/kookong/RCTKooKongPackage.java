@@ -1,4 +1,4 @@
-package com.conglin.kookong.RCTKooKong;
+package com.conglin.kookong;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -13,6 +13,7 @@ import com.facebook.react.uimanager.ViewManager;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.conglin.kookong.util.Logger;
 import com.conglin.kookong.util.TipsUtil;
+import com.conglin.kookong.RCTKooKongModule;
 public class RCTKooKongPackage implements ReactPackage {
 
 

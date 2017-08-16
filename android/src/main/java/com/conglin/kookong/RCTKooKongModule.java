@@ -1,5 +1,5 @@
 
-package com.conglin.kookong.RCTKooKong;
+package com.conglin.kookong;
 
 
 import android.util.Log;
