@@ -271,7 +271,7 @@ public class RCTKooKongModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void getChangePowerIRDataById(final String rid,
+    public void powerOn(final String rid,
                               final int deviceType,
                               final Callback successCallback,
                               final Callback errorCallback) {
@@ -287,6 +287,7 @@ public class RCTKooKongModule extends ReactContextBaseJavaModule {
                 String acState = DataStoreUtil.i().getString("AC_STATE_" + rid, "");//获取以前保存过的空调状态
                 mKKACManager.setACStateV2FromString(acState);
                 mKKACManager.changePowerState();
+                Log.d("acState", acState);
                 int[] patternsInArray = mKKACManager.getACIRPatternIntArray();//这些码可以直接给ConsumerIR发送出去
                 Log.d("IRPattern", Arrays.toString(patternsInArray));
                 successCallback.invoke(Arrays.toString(patternsInArray));
@@ -307,6 +308,41 @@ public class RCTKooKongModule extends ReactContextBaseJavaModule {
         });
     }
 
+    @ReactMethod
+    public void powerOff(final String rid,
+                        final int deviceType,
+                        final Callback successCallback,
+                        final Callback errorCallback) {
+        //获取rid = 4162 的 红外码, 批量获取红外码的方式是逗号隔开
+        KookongSDK.getIRDataById(rid, deviceType, new IRequestResult<IrDataList>()
+        {
+
+            @Override
+            public void onSuccess(String msg, IrDataList result) {
+                List<IrData> irDatas = result.getIrDataList();
+                mIrData = irDatas.get(0);
+                mKKACManager.initIRData(mIrData.rid, mIrData.exts, null);//根据空外数据初始化空调解码器
+                String acState = DataStoreUtil.i().getString("AC_STATE_" + rid, "");//获取以前保存过的空调状态
+                mKKACManager.setACStateV2FromString(acState);
+                Log.d("acState", acState);
+                int[] patternsInArray = mKKACManager.getACIRPatternIntArray();//这些码可以直接给ConsumerIR发送出去
+                successCallback.invoke(Arrays.toString(patternsInArray));
+            }
+
+            @Override
+            public void onFail(Integer errorCode, String msg) {
+
+                //按红外设备授权的客户，才会用到这两个值
+                if(errorCode==AppConst.CUSTOMER_DEVICE_REMOTE_NUM_LIMIT){//同一个设备下载遥控器超过了50套限制
+                    msg = "下载的遥控器超过了套数限制";
+                }else if(errorCode==AppConst.CUSTOMER_DEVICE_NUM_LIMIT){//设备总数超过了授权的额度
+                    msg="设备总数超过了授权的额度";
+                }
+                //TipsUtil.toast(MainActivity.this, msg);
+                errorCallback.invoke(msg);
+            }
+        });
+    }
 
 
 }
