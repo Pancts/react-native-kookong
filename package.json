@@ -1,0 +1,81 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "react-native-kookong@github:conglin/react-native-kookong",
+        "scope": null,
+        "escapedName": "react-native-kookong",
+        "name": "react-native-kookong",
+        "rawSpec": "github:conglin/react-native-kookong",
+        "spec": "github:conglin/react-native-kookong",
+        "type": "hosted",
+        "hosted": {
+          "type": "github",
+          "ssh": "git@github.com:conglin/react-native-kookong.git",
+          "sshUrl": "git+ssh://git@github.com/conglin/react-native-kookong.git",
+          "httpsUrl": "git+https://github.com/conglin/react-native-kookong.git",
+          "gitUrl": "git://github.com/conglin/react-native-kookong.git",
+          "shortcut": "github:conglin/react-native-kookong",
+          "directUrl": "https://raw.githubusercontent.com/conglin/react-native-kookong/master/package.json"
+        }
+      },
+      "/Users/user/Documents/projects/snowflake"
+    ]
+  ],
+  "_from": "conglin/react-native-kookong",
+  "_id": "react-native-kookong@0.2.2",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/react-native-kookong",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "react-native-kookong@github:conglin/react-native-kookong",
+    "scope": null,
+    "escapedName": "react-native-kookong",
+    "name": "react-native-kookong",
+    "rawSpec": "github:conglin/react-native-kookong",
+    "spec": "github:conglin/react-native-kookong",
+    "type": "hosted",
+    "hosted": {
+      "type": "github",
+      "ssh": "git@github.com:conglin/react-native-kookong.git",
+      "sshUrl": "git+ssh://git@github.com/conglin/react-native-kookong.git",
+      "httpsUrl": "git+https://github.com/conglin/react-native-kookong.git",
+      "gitUrl": "git://github.com/conglin/react-native-kookong.git",
+      "shortcut": "github:conglin/react-native-kookong",
+      "directUrl": "https://raw.githubusercontent.com/conglin/react-native-kookong/master/package.json"
+    }
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git://github.com/conglin/react-native-kookong.git#ce65f63a9f2973400750fc8391721124987c2648",
+  "_shasum": "bfc9229c38630e9012558fb9e699ce89109f6270",
+  "_shrinkwrap": null,
+  "_spec": "react-native-kookong@github:conglin/react-native-kookong",
+  "_where": "/Users/user/Documents/projects/snowflake",
+  "author": {
+    "name": "lincong.javatech@gmail.com"
+  },
+  "dependencies": {},
+  "description": "react-native KooKong module",
+  "devDependencies": {},
+  "gitHead": "ce65f63a9f2973400750fc8391721124987c2648",
+  "keywords": [
+    "react-native",
+    "react",
+    "native",
+    "ir",
+    "kookong"
+  ],
+  "license": "MIT",
+  "name": "react-native-kookong",
+  "nativePackage": true,
+  "optionalDependencies": {},
+  "readme": "# react-native-kookong\nkookong api for react native\n",
+  "readmeFilename": "README.md",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.2.2"
+}
